@@ -1,40 +1,37 @@
-# GTD module guide
+# GTD human guide
 
-Use this module when the user needs fast capture and trusted follow-up.
+Use GTD when your mind or inbox is noisy.
 
-GTD is useful for chaotic input: ideas, tasks, messages, obligations, and open loops. The agent's first job is not to organize perfectly. It is to capture reliably, clarify later, and keep next actions visible.
+This module optimizes for quick capture first, clean decisions later. It is useful when the user has tasks, reminders, fragments, voice notes, and obligations arriving faster than they can organize them.
 
-## What this module provides
+## Why use it
 
-- A simple inbox-first operating mode.
-- Agent instructions for appending tasks as Markdown checkboxes.
-- A function-calling schema for adding items with optional context tags.
+- Fast capture with minimal friction.
+- Clear separation between capture and triage.
+- Context tags for practical execution.
+- Good fit for async agent review passes.
 
-## Minimal files
+## Minimal setup
 
 ```text
 00_Inbox.md
+```
+
+Optional later files:
+
+```text
 Next_Actions.md
 Waiting_For.md
 Someday_Maybe.md
 Reference.md
 ```
 
-The only required file is `00_Inbox.md`. Other files can be created after the user approves the workflow.
+## Agent boundary
 
-## When to use
+Appending new items to `00_Inbox.md` is safe. Rewriting or deleting inbox items requires confirmation.
 
-- The user is overwhelmed.
-- The user needs quick capture from voice, chat, or notes.
-- The agent should not decide structure yet.
-- Tasks need context tags such as `@home`, `@computer`, `@errand`, or `@waiting`.
+## Best first prompt
 
-## Recommended workflow
-
-1. Capture everything into `00_Inbox.md`.
-2. Use checkboxes for actionable items.
-3. Add context tags only when obvious.
-4. During triage, classify each item as next action, waiting-for, someday/maybe, calendar, project, or reference.
-5. Ask before moving items out of the inbox.
-
-Reference: https://gettingthingsdone.com/what-is-gtd/
+```text
+Capture this into my GTD inbox as a checkbox. Add only obvious context tags.
+```

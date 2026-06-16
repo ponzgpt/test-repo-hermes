@@ -1,108 +1,123 @@
 # Hermes-PKM-Toolkit
 
-Modular cognitive protocols for local-first AI agents working on plain-text PKM vaults.
+Libreria modular de protocolos cognitivos para agentes autonomos que operan sobre bovedas Markdown locales.
 
-Hermes-PKM-Toolkit is a small library of system prompts, file-operation tools, and framework-specific directives for agents such as Hermes or Moltbot. It helps an agent work inside Markdown/Obsidian-style folders without introducing a database, backend service, or hidden state.
+Hermes-PKM-Toolkit no reemplaza a Hermes. Hermes es el agente/runtime. Este repositorio aporta la capa minima para que Hermes, Moltbot u otro agente local pueda trabajar sobre una boveda Markdown/Obsidian usando protocolos cargables: Johnny.Decimal, GTD y PARA.
 
-The local filesystem is the database. Git is the audit log. Markdown is the interface.
+La base de datos es el sistema de archivos local. Git es el log de auditoria. Markdown es la interfaz.
 
-## Philosophy
+## Filosofia a la carta
 
-- **A la carte modules:** load only GTD, only Johnny.Decimal, only PARA, or any combination.
-- **Plain text first:** everything important is visible as `.md`, `.json`, or Python source.
-- **Agent-readable and human-readable:** every module contains human guidance and agent instructions.
-- **No heavy infrastructure:** no SQL, no vector database, no server requirement.
-- **Review before mutation:** agents should propose moves, writes, and archive operations before applying them.
+Carga solo lo que necesites:
 
-## Repository layout
+| Caso de uso | Skills |
+|---|---|
+| Operar una boveda Markdown local con MCP | `00_CORE/base_skill.md` |
+| Estructura numerica estable | `01_JOHNNY_DECIMAL/AGENT_jd_skill.md` |
+| Captura rapida y triaje de tareas | `02_GTD/AGENT_gtd_skill.md` |
+| Gestion accionable de proyectos/areas/recursos | `03_PARA/AGENT_para_skill.md` |
+
+Las skills son Markdown deliberadamente simples. Se cargan como system prompt overrides, no como logica hardcodeada en Python.
+
+## Estructura
 
 ```text
 Hermes-PKM-Toolkit/
   00_CORE/
-    hermes_base_system_prompt.md
-    file_ops.py
-    generic_file_ops_tools.json
+    hermes_mcp_server.py
+    delta_tracker.py
+    base_skill.md
   01_JOHNNY_DECIMAL/
     HUMANS_jd_guide.md
-    AGENT_jd_instructions.md
-    jd_routing_tools.json
+    AGENT_jd_skill.md
   02_GTD/
     HUMANS_gtd_guide.md
-    AGENT_gtd_instructions.md
-    gtd_triage_tools.json
+    AGENT_gtd_skill.md
   03_PARA/
     HUMANS_para_guide.md
-    AGENT_para_instructions.md
-    para_archiving_tools.json
+    AGENT_para_skill.md
 ```
 
-## How to integrate with a local agent
+## Setup MCP
 
-1. Load `00_CORE/hermes_base_system_prompt.md` as the base system prompt.
-2. Expose `00_CORE/file_ops.py` through the JSON schemas in `00_CORE/generic_file_ops_tools.json`.
-3. Add one or more module overrides:
-   - `01_JOHNNY_DECIMAL/AGENT_jd_instructions.md`
-   - `02_GTD/AGENT_gtd_instructions.md`
-   - `03_PARA/AGENT_para_instructions.md`
-4. Register the module-specific tool schemas if your agent runtime supports function calling.
-5. Point the agent at a local Markdown vault, ideally under Git.
+Requisitos:
 
-Example stack:
+- Python 3.10+
+- SDK oficial de MCP para Python
+
+Instala el SDK MCP en tu entorno local:
+
+```bash
+python3 -m pip install mcp
+```
+
+Define la raiz de tu boveda Markdown:
+
+```bash
+export HERMES_VAULT_ROOT="$HOME/Documents/MyVault"
+```
+
+Arranca el servidor MCP:
+
+```bash
+python3 00_CORE/hermes_mcp_server.py
+```
+
+El servidor expone estas tools:
+
+- `list_resources`: lista archivos `.md` de la boveda.
+- `read_resource`: lee un archivo `.md`.
+- `append_to_file`: anade contenido a un archivo `.md`.
+- `create_file`: crea un archivo `.md` nuevo sin sobrescribir.
+
+Todas las rutas son relativas a `HERMES_VAULT_ROOT`. El servidor bloquea path traversal y rechaza archivos que no sean Markdown.
+
+## Delta tracking
+
+Para que el agente procese solo notas modificadas desde la ultima ejecucion:
+
+```bash
+python3 00_CORE/delta_tracker.py "$HERMES_VAULT_ROOT"
+```
+
+Esto crea o actualiza:
 
 ```text
-Hermes agent
-  + base system prompt
-  + GTD instructions
-  + Johnny.Decimal instructions
-  + generic file tools
-  + GTD/JD tool schemas
-  -> local Obsidian vault in iCloud/Dropbox/local disk
-  -> Git commits for reviewable changes
+<vault>/.hermes/delta_tracker.json
 ```
 
-## Tool schema format
+El tracker compara `sha256`, `mtime_ns` y `size` de cada `.md`. La salida JSON incluye:
 
-Tool definitions use an OpenAI-style function calling shape:
+- `added`
+- `modified`
+- `deleted`
+- `unchanged_count`
+- `state_path`
 
-```json
-{
-  "type": "function",
-  "function": {
-    "name": "read_md",
-    "description": "Read a Markdown file from the local vault.",
-    "parameters": {
-      "type": "object",
-      "properties": {},
-      "required": []
-    }
-  }
-}
-```
+## Carga dinamica de skills
 
-The schemas are intentionally runtime-neutral. Hermes, Moltbot, or another local agent can map them to Python handlers, MCP tools, shell wrappers, or native function calls.
+Flujo recomendado:
 
-## Module selection
+1. Carga `00_CORE/base_skill.md` como system prompt base.
+2. Arranca `00_CORE/hermes_mcp_server.py` apuntando a la boveda.
+3. Ejecuta `00_CORE/delta_tracker.py` al inicio de cada sesion.
+4. Carga una o mas skills:
+   - `01_JOHNNY_DECIMAL/AGENT_jd_skill.md`
+   - `02_GTD/AGENT_gtd_skill.md`
+   - `03_PARA/AGENT_para_skill.md`
+5. El agente usa las tools MCP para leer, crear y anadir contenido Markdown.
+6. El agente propone planes antes de mover, renombrar o archivar.
 
-| Use case | Load modules |
-|---|---|
-| Quick capture and next actions | `00_CORE` + `02_GTD` |
-| Structured knowledge vault | `00_CORE` + `01_JOHNNY_DECIMAL` |
-| Project/resource management | `00_CORE` + `03_PARA` |
-| Full local PKM operating system | `00_CORE` + all modules |
+## Principios de seguridad
 
-## Safety model
+- No hay SQL ni NoSQL.
+- No hay API REST.
+- No hay estado oculto fuera de la boveda, salvo `.hermes/delta_tracker.json`.
+- No se sobrescriben archivos desde `create_file`.
+- No se borran archivos.
+- No se mueven archivos en el core MCP actual.
+- Toda operacion destructiva futura debe exigir confirmacion explicita.
 
-- Treat every write, move, rename, and archive as a proposed diff.
-- Never invent top-level folder systems without user confirmation.
-- Never delete content through these primitives.
-- Prefer appending to inboxes and logs over destructive rewrites.
-- Keep secrets out of prompts, logs, and committed files.
-- Use Git commits as checkpoints when an agent changes the vault.
+## Estado
 
-## Status
-
-Early-stage toolkit for local agent workflows in the Machines Do It Better ecosystem. The current scope is deliberately small: prompts, JSON tool schemas, and safe Python file primitives.
-
-## License
-
-MIT. See `LICENSE`.
+Toolkit temprano y deliberadamente pequeno para el ecosistema Machines Do It Better. La superficie estable actual es: MCP local, delta tracking, y skills Markdown modulares.

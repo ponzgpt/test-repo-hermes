@@ -1,16 +1,17 @@
-# Johnny.Decimal module guide
+# Johnny.Decimal human guide
 
-Use this module when the vault needs stable addresses.
+Use Johnny.Decimal when your vault needs stable addresses.
 
-Johnny.Decimal is useful when a folder system has grown too vague and the user needs durable numbered locations for notes, files, and projects. It works well for structured Obsidian vaults, local Git folders, and long-lived knowledge bases.
+JD is ideal for structured Markdown/Obsidian vaults where notes should have durable homes. It reduces vague folder sprawl by assigning numeric ranges to areas of knowledge.
 
-## What this module provides
+## Why use it
 
-- Human-readable guidance for using numbered areas and categories.
-- Agent instructions for routing notes into existing numeric ranges.
-- A function-calling schema for creating a new Johnny.Decimal folder after confirmation.
+- Stable locations for notes and files.
+- Predictable routing for agents.
+- Lower ambiguity when multiple systems touch the same vault.
+- Cleaner Git diffs because moves are intentional.
 
-## Minimal model
+## Minimal shape
 
 ```text
 10-19 Operations
@@ -20,27 +21,15 @@ Johnny.Decimal is useful when a folder system has grown too vague and the user n
 90-99 Archive
 ```
 
-The exact map belongs to the user. The agent can propose structure, but it should not invent permanent top-level categories without confirmation.
+These ranges are only a starting point. Your actual map should fit your life and work.
 
-## When to use
+## Agent boundary
 
-- The vault has many notes that need stable homes.
-- The user wants predictable locations rather than fuzzy tags only.
-- Multiple agents or automations need to agree on where files belong.
-- The user wants Git diffs to show intentional routing decisions.
+Hermes may propose a new category, but it should not create one without your confirmation. Numbered folders become part of your long-term knowledge architecture.
 
-## When not to use
+## Best first prompt
 
-- The user only needs quick capture.
-- The vault is temporary.
-- The user has not approved a top-level numeric map.
-
-## Recommended workflow
-
-1. Ask the agent to inspect the current folder map.
-2. Ask it to propose a Johnny.Decimal routing table.
-3. Review the proposed numeric ranges.
-4. Approve a small number of folders.
-5. Let the agent route notes only into approved folders.
-
-Reference: https://johnnydecimal.com/
+```text
+Inspect my current vault folders and propose a Johnny.Decimal routing map.
+Do not create folders yet. Show the reasoning and ask for confirmation.
+```

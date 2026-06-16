@@ -1,38 +1,32 @@
-# PARA module guide
+# PARA human guide
 
-Use this module when the user wants a simple operational split between active work, responsibilities, reference, and inactive material.
+Use PARA when you want action-oriented organization.
 
-PARA is useful for project-heavy users who do not want a complex taxonomy. It asks one practical question: how actionable is this material now?
+PARA sorts information by how actionable it is now, not by abstract topic taxonomy. It is especially useful for project-heavy users who want a vault that supports execution.
 
-## What this module provides
-
-- Human guidance for when to use Projects, Areas, Resources, and Archives.
-- Agent instructions for evaluating actionability.
-- Function-calling schemas for spinning up projects and archiving inactive folders.
-
-## PARA buckets
+## Buckets
 
 ```text
-1-Projects   Active outcomes with deadlines or finish lines
-2-Areas      Ongoing responsibilities to maintain
-3-Resources  Reference topics and reusable material
-4-Archives   Inactive material from any other bucket
+1-Projects   Active outcomes with a finish line
+2-Areas      Ongoing responsibilities
+3-Resources  Reference material
+4-Archives   Inactive material
 ```
 
-## When to use
+## Why use it
 
-- The user has many active projects.
-- The user wants low-friction folder routing.
-- Material should move as its actionability changes.
-- A local agent needs a simple decision tree.
+- Simple enough for daily use.
+- Easy for an agent to reason about.
+- Works well with Markdown folders.
+- Keeps projects separate from long-term responsibilities.
 
-## Recommended workflow
+## Agent boundary
 
-1. Ask whether the item is tied to a current outcome.
-2. If yes, route to `1-Projects`.
-3. If it is an ongoing responsibility, route to `2-Areas`.
-4. If it may be useful later, route to `3-Resources`.
-5. If inactive, route to `4-Archives`.
-6. Ask before archiving.
+Hermes may propose PARA moves, but it should not move or archive files without confirmation. Archiving can hide context, so it must be explicit.
 
-Reference: https://fortelabs.com/blog/para/
+## Best first prompt
+
+```text
+Review these notes and propose whether each belongs in Projects, Areas, Resources, or Archives.
+Do not move anything yet.
+```
